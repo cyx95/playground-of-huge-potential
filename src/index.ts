@@ -1,6 +1,6 @@
 import "./style.css";
 
-import { Scene, PerspectiveCamera, AmbientLight, BoxGeometry, MeshBasicMaterial, Mesh, Side, FrontSide, SphereGeometry, Vector3, Color, CylinderGeometry, OctahedronGeometry } from "three";
+import { Scene, PerspectiveCamera, AmbientLight, BoxGeometry, MeshBasicMaterial, Mesh, Side, FrontSide, SphereGeometry, Vector3, Color, CylinderGeometry, OctahedronGeometry, ConeGeometry, PointLight } from "three";
 
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -27,7 +27,7 @@ let loopHooks: Array<(dt: number) => void> = [];
         // Ground
         const GROUND_SIZE = 1000;
         const groundGeometry = new BoxGeometry(GROUND_SIZE, 1, GROUND_SIZE, 70, 1, 70);
-        const groundMesh = new Mesh(groundGeometry, new MeshBasicMaterial({ color: 0x227700 }));
+        const groundMesh = new Mesh(groundGeometry, new MeshBasicMaterial({ color: 0x227700}));
         scene.add(groundMesh);
 
         // Red Ball
@@ -71,6 +71,26 @@ let loopHooks: Array<(dt: number) => void> = [];
         prism.scale.multiplyScalar(4);
         prism.position.y += 80;
 
+        //Sea saw
+        const cone = new ConeGeometry(5, 15);
+        const basicMaterial = new MeshBasicMaterial({ color: 0xddaa00 });
+        const seaSawBase = new Mesh(cone, basicMaterial);
+        scene.add(seaSawBase);
+        seaSawBase.position.y = 10;
+        seaSawBase.position.z = -350;
+        seaSawBase.scale.multiplyScalar(5);
+
+        //Plank
+        const plankGeo = new BoxGeometry(70, 1, 10);
+        const plankMaterial = new MeshBasicMaterial({ color: 0xddaa00 });
+        const plank = new Mesh(plankGeo, plankMaterial);
+        scene.add(plank);
+        plank.position.copy(seaSawBase.position);
+        plank.position.y += 35; 
+        plank.scale.multiplyScalar(5);
+        plank.rotateZ(0.2); // Radians
+
+
         loopHooks.push(dt => {
             prism.rotation.y += 0.05;
         });
@@ -79,6 +99,17 @@ let loopHooks: Array<(dt: number) => void> = [];
             controls.update();
         });
 
+        const ambientLight = new AmbientLight(0xffffff, 0.2);
+        scene.add(ambientLight);
+
+        const pointLight = new PointLight(0xdddd00, 10, 500);
+        scene.add(pointLight);
+        pointLight.position.y = 40;
+
+        loopHooks.push(dt => {
+            pointLight.position.x = 400 * Math.sin(dt/500);
+            pointLight.position.z = 200 * Math.sin(dt/500)
+        })
     };
 
     renderLoop(scene, camera, (dt) => {
